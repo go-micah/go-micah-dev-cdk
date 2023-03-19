@@ -22,3 +22,15 @@ func TestGoMicahDevStack(t *testing.T) {
 		"VisibilityTimeout": 300,
 	})
 }
+
+func TestGoMicahDevStackVPC(t *testing.T) {
+	app := awscdk.NewApp(nil)
+
+	stack := NewGoMicahDevStack(app, "MyStack", nil)
+
+	template := assertions.Template_FromStack(stack, nil)
+
+	template.HasResourceProperties(jsii.String("AWS::EC2::VPC"), map[string]interface{}{
+		"CidrBlock": "10.0.0.0/16",
+	})
+}
