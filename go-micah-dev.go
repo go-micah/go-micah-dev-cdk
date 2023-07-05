@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/aws/aws-cdk-go/awscdk/v2"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awsec2"
-	"github.com/aws/aws-cdk-go/awscdk/v2/awssqs"
 	"github.com/aws/constructs-go/constructs/v10"
 	"github.com/aws/jsii-runtime-go"
 )
@@ -19,17 +18,12 @@ func NewGoMicahDevStack(scope constructs.Construct, id string, props *GoMicahDev
 	}
 	stack := awscdk.NewStack(scope, &id, &sprops)
 
-	// The code that defines your stack goes here
-
-	// example resource
-	awssqs.NewQueue(stack, jsii.String("GoMicahDevQueue"), &awssqs.QueueProps{
-		VisibilityTimeout: awscdk.Duration_Seconds(jsii.Number(300)),
-	})
-
-	// defines a vpc with ine private and one public subnet and one nat gateway
+	// defines a vpc with one private and one public subnet and one nat gateway
 	awsec2.NewVpc(stack, jsii.String("GoMicahDevVPC"), &awsec2.VpcProps{
-		Cidr:   jsii.String("10.0.0.0/16"),
-		MaxAzs: jsii.Number(1),
+		VpcName:     jsii.String("micadev"),
+		Cidr:        jsii.String("10.0.0.0/16"),
+		MaxAzs:      jsii.Number(1),
+		NatGateways: jsii.Number(0),
 	})
 
 	return stack
