@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/aws/aws-cdk-go/awscdk/v2"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awsec2"
+	"github.com/aws/aws-cdk-go/awscdk/v2/awsiam"
 	"github.com/aws/constructs-go/constructs/v10"
 	"github.com/aws/jsii-runtime-go"
 )
@@ -18,13 +19,39 @@ func NewGoMicahDevStack(scope constructs.Construct, id string, props *GoMicahDev
 	}
 	stack := awscdk.NewStack(scope, &id, &sprops)
 
-	// defines a vpc with three private and three public subnet and one nat gateway
-	awsec2.NewVpc(stack, jsii.String("GoMicahDevVPC"), &awsec2.VpcProps{
+	// This defines a vpc with three private and three public subnets and one nat gateway
+	// NOTE: there is a running cost for the NAT GW of $0.045 per hour in us-east-1
+	vpc := awsec2.NewVpc(stack, jsii.String("GoMicahDevVPC"), &awsec2.VpcProps{
 		VpcName:     jsii.String("micadev"),
 		IpAddresses: awsec2.IpAddresses_Cidr(jsii.String("10.0.0.0/16")),
 		MaxAzs:      jsii.Number(3),
 		NatGateways: jsii.Number(1),
 	})
+
+	// Next we will define our EC2 instance properties
+
+	// This creates a new role using the AmazonSSMManagedInstanceCore managed policy. We will use this to log into our EC2 instance
+	ssmPolicy := awsiam.ManagedPolicy_FromAwsManagedPolicyName(jsii.String("AmazonSSMManagedInstanceCore"))
+	instanceRole := awsiam.NewRole(stack, jsii.String("micadevInstanceRole"),
+		&awsiam.RoleProps{
+			AssumedBy:       awsiam.NewServicePrincipal(jsii.String("ec2.amazonaws.com"), nil),
+			Description:     jsii.String("Instance Role"),
+			ManagedPolicies: &[]awsiam.IManagedPolicy{ssmPolicy},
+		},
+	)
+
+	// This defines an EC2 instance we will use for remote development
+	awsec2.NewInstance(stack, jsii.String("micadev-1"),
+		&awsec2.InstanceProps{
+			InstanceType: awsec2.InstanceType_Of(awsec2.InstanceClass_C5, awsec2.InstanceSize_LARGE),
+			MachineImage: awsec2.NewAmazonLinuxImage(nil),
+			Vpc:          vpc,
+			InstanceName: jsii.String("micadev-1"),
+			Role:         instanceRole,
+			VpcSubnets: &awsec2.SubnetSelection{
+				SubnetType: awsec2.SubnetType_PRIVATE_WITH_EGRESS,
+			},
+		})
 
 	return stack
 }
