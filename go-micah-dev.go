@@ -18,12 +18,12 @@ func NewGoMicahDevStack(scope constructs.Construct, id string, props *GoMicahDev
 	}
 	stack := awscdk.NewStack(scope, &id, &sprops)
 
-	// defines a vpc with one private and one public subnet and one nat gateway
+	// defines a vpc with three private and three public subnet and one nat gateway
 	awsec2.NewVpc(stack, jsii.String("GoMicahDevVPC"), &awsec2.VpcProps{
 		VpcName:     jsii.String("micadev"),
-		Cidr:        jsii.String("10.0.0.0/16"),
-		MaxAzs:      jsii.Number(1),
-		NatGateways: jsii.Number(0),
+		IpAddresses: awsec2.IpAddresses_Cidr(jsii.String("10.0.0.0/16")),
+		MaxAzs:      jsii.Number(3),
+		NatGateways: jsii.Number(1),
 	})
 
 	return stack
