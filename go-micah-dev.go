@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+
 	"github.com/aws/aws-cdk-go/awscdk/v2"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awsec2"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awsiam"
@@ -41,12 +43,13 @@ func NewGoMicahDevStack(scope constructs.Construct, id string, props *GoMicahDev
 	)
 
 	// This defines an EC2 instance we will use for remote development
-	awsec2.NewInstance(stack, jsii.String("micadev-1"),
+	awsec2.NewInstance(stack, jsii.String(os.Getenv("INSTANCE_NAME")),
 		&awsec2.InstanceProps{
 			InstanceType: awsec2.InstanceType_Of(awsec2.InstanceClass_C5, awsec2.InstanceSize_LARGE),
 			MachineImage: awsec2.NewAmazonLinuxImage(nil),
 			Vpc:          vpc,
-			InstanceName: jsii.String("micadev-1"),
+			KeyName:      jsii.String(os.Getenv("AWS_INSTANCE_KEY_PAIR")),
+			InstanceName: jsii.String(os.Getenv("INSTANCE_NAME")),
 			Role:         instanceRole,
 			VpcSubnets: &awsec2.SubnetSelection{
 				SubnetType: awsec2.SubnetType_PRIVATE_WITH_EGRESS,
