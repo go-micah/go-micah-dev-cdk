@@ -3,6 +3,8 @@ package main
 import (
 	"os"
 
+	_ "github.com/joho/godotenv/autoload"
+
 	"github.com/aws/aws-cdk-go/awscdk/v2"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awsec2"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awsiam"
@@ -43,7 +45,7 @@ func NewGoMicahDevStack(scope constructs.Construct, id string, props *GoMicahDev
 	)
 
 	// This defines an EC2 instance we will use for remote development
-	awsec2.NewInstance(stack, jsii.String(os.Getenv("INSTANCE_NAME")),
+	awsec2.NewInstance(stack, jsii.String("micadevInstance"),
 		&awsec2.InstanceProps{
 			InstanceType: awsec2.InstanceType_Of(awsec2.InstanceClass_C5, awsec2.InstanceSize_LARGE),
 			MachineImage: awsec2.NewAmazonLinuxImage(nil),
